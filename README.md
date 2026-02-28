@@ -1,126 +1,158 @@
-# RAG Project with Endee Vector Database
+# RAG Application with Endee Vector Database
 
-This project implements a Retrieval-Augmented Generation (RAG) system using the Endee vector database and FastAPI.
+A complete Retrieval-Augmented Generation (RAG) system built with FastAPI and Endee vector database.
 
-## Architecture
+## Features
 
-- **Vector Database**: Endee (running in Docker container)
-- **API Framework**: FastAPI
-- **Embedding Model**: Sentence Transformers (all-MiniLM-L6-v2)
-- **Python Client**: Endee Python SDK
+- **Vector Database**: Endee (high-performance vector storage)
+- **API Framework**: FastAPI with automatic Swagger documentation
+- **Embeddings**: Sentence Transformers (all-MiniLM-L6-v2)
+- **Semantic Search**: Cosine similarity with 384-dimensional vectors
 
-## Setup Instructions
+## Prerequisites
 
-### 1. Start Endee Vector Database
+- Docker Desktop (for Endee container)
+- Python 3.8+
+- Git
 
+## Quick Start
+
+### 1. Clone & Setup
 ```bash
-# From the project root
-docker-compose up -d
+git clone https://github.com/AnjeshDash/Rag-application.git
+cd Rag-application
 ```
 
-This will start the Endee server on port 8080.
+### 2. Start Vector Database
+```bash
+docker-compose up -d
+```
+This starts Endee on port 8080.
 
-### 2. Set up Python Environment
-
+### 3. Install Dependencies
 ```bash
 cd my-rag-api
 pip install -r requirements.txt
 ```
 
-### 3. Start the API Server
-
+### 4. Start API Server
 ```bash
-python run_app.py
+python simple_server.py
+```
+API runs on http://localhost:8000
+
+## API Documentation
+
+Visit http://localhost:8000/docs for interactive Swagger UI.
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Health check |
+| POST | `/create_index` | Create vector index |
+| POST | `/add_document` | Add document to index |
+| POST | `/search` | Semantic search |
+
+### Usage Examples
+
+#### Add Document
+```bash
+curl -X POST "http://localhost:8000/add_document?text=Your document here&doc_id=unique_id"
 ```
 
-The API will be available at `http://localhost:8000`
-
-## API Endpoints
-
-### Create Index
-```http
-POST /create_index
+#### Search
+```bash
+curl -X POST -H "Content-Type: application/json" \
+     -d '{"question":"What is India?","top_k":3}' \
+     http://localhost:8000/search
 ```
-Creates a vector index with 384 dimensions (compatible with all-MiniLM-L6-v2).
-
-### Add Document
-```http
-POST /add_document
-```
-Adds a document to the vector index.
-
-**Parameters:**
-- `text` (string): The document text to add
-- `doc_id` (string, optional): Custom document ID
-
-### Search
-```http
-POST /search
-```
-Searches for similar documents.
-
-**Body:**
-```json
-{
-  "question": "What is the capital of India?",
-  "top_k": 3
-}
-```
-
-### Health Check
-```http
-GET /
-```
-Returns API status.
 
 ## Testing
 
-Run the test script to verify the complete RAG pipeline:
-
+Run the test script:
 ```bash
-python test_rag.py
+python test_api.py
 ```
 
 This will:
-1. Create an index
-2. Add sample documents about India
-3. Perform semantic search queries
+- Create index (if needed)
+- Add sample documents
+- Test semantic search queries
 
 ## Project Structure
 
 ```
-rag-project/
-├── docker-compose.yml          # Endee container configuration
+rag-application/
+├── docker-compose.yml      # Endee container setup
 ├── my-rag-api/
-│   ├── app.py                 # Main FastAPI application
-│   ├── run_app.py            # Server startup script
-│   ├── requirements.txt      # Python dependencies
-│   ├── test_endee.py         # Endee connection test
-│   └── test_rag.py           # Complete RAG pipeline test
-├── endee-data/               # Docker volume for vector data
-└── README.md                 # This file
+│   ├── app.py           # Main FastAPI application
+│   ├── simple_server.py  # Standalone server with logging
+│   ├── test_api.py      # Complete API test suite
+│   └── requirements.txt # Python dependencies
+├── .gitignore          # Git ignore rules
+└── README.md           # This file
 ```
-
-## How It Works
-
-1. **Document Ingestion**: Text documents are converted to 384-dimensional vectors using Sentence Transformers
-2. **Vector Storage**: Vectors are stored in Endee with cosine similarity and float32 precision
-3. **Semantic Search**: Queries are converted to vectors and searched against the stored vectors
-4. **Results**: Returns the most similar documents with similarity scores
 
 ## Configuration
 
 - **Index Name**: `test_index`
-- **Embedding Dimension**: 384
-- **Similarity Metric**: Cosine
+- **Vector Dimension**: 384 (all-MiniLM-L6-v2)
+- **Similarity**: Cosine
 - **Precision**: float32
 - **Endee URL**: http://localhost:8080
 - **API URL**: http://localhost:8000
 
-## Next Steps
+## Development
 
-- Add authentication to the API
-- Implement document chunking for large texts
-- Add metadata filtering
-- Create a web interface
-- Deploy to production
+### Adding New Endpoints
+1. Edit `app.py` or `simple_server.py`
+2. Add your FastAPI route
+3. Restart server
+
+### Custom Embeddings
+Change the model in `simple_server.py`:
+```python
+model = SentenceTransformer("your-model-name")
+```
+
+## Troubleshooting
+
+### Port Already in Use
+```bash
+# Kill processes on ports 8000 or 8080
+netstat -ano | findstr :8000
+netstat -ano | findstr :8080
+```
+
+### Docker Issues
+```bash
+# Reset Docker containers
+docker-compose down
+docker system prune -f
+docker-compose up -d
+```
+
+### Python Dependencies
+```bash
+# Fresh install
+pip install -r requirements.txt --force-reinstall
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Test thoroughly
+5. Submit pull request
+
+## License
+
+This project is open source and available under the MIT License.
+
+## Acknowledgments
+
+- [Endee](https://endee.io) - High-performance vector database
+- [Sentence Transformers](https://sbert.net/) - Text embeddings
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
